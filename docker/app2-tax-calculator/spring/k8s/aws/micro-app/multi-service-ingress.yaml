@@ -24,10 +24,11 @@ spec:
                 port:
                   number: 80
           # FRONTEND — serve static UI at root
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend
-                port:
-                  number: 80
+          # TODO: uncomment once the "frontend" Service is deployed
+          # - path: /
+          #   pathType: Prefix
+          #   backend:
+          #     service:
+          #       name: frontend
+          #       port:
+          #         number: 80
