@@ -12,6 +12,7 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   SERVICE_A_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/tax-service-a
   SERVICE_B_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/tax-service-b
+  APP_ROOT: docker/app2-tax-calculator/spring
 
 jobs:
   build-and-deploy:
@@ -32,12 +33,12 @@ jobs:
 
       # ---------- 3. Build service-a ----------
       - name: Build service-a with Maven
-        working-directory: service-a
+        working-directory: ${{ env.APP_ROOT }}/service-a
         run: mvn -B clean package -DskipTests
 
       # ---------- 4. Build service-b ----------
       - name: Build service-b with Maven
-        working-directory: service-b
+        working-directory: ${{ env.APP_ROOT }}/service-b
         run: mvn -B clean package -DskipTests
 
       # ---------- 5. Login to Docker Hub ----------
@@ -56,7 +57,7 @@ jobs:
       - name: Build and push service-a image
         uses: docker/build-push-action@v7
         with:
-          context: ./service-a
+          context: ./${{ env.APP_ROOT }}/service-a
           push: true
           tags: |
             ${{ env.SERVICE_A_IMAGE }}:${{ steps.tag.outputs.tag }}
@@ -66,7 +67,7 @@ jobs:
       - name: Build and push service-b image
         uses: docker/build-push-action@v7
         with:
-          context: ./service-b
+          context: ./${{ env.APP_ROOT }}/service-b
           push: true
           tags: |
             ${{ env.SERVICE_B_IMAGE }}:${{ steps.tag.outputs.tag }}
@@ -90,7 +91,7 @@ jobs:
       # ---------- 11. Apply ConfigMap (idempotent) ----------
       - name: Apply ConfigMap
         run: |
-          kubectl apply -f k8s/aws/micro-app/tax-service-config.yaml
+          kubectl apply -f ${{ env.APP_ROOT }}/k8s/aws/micro-app/tax-service-config.yaml
 
       # ---------- 12. Set image in deployment manifests ----------
       - name: Render image tags into manifests
@@ -98,21 +99,21 @@ jobs:
           IMAGE_TAG=${{ steps.tag.outputs.tag }}
           # Service A
           sed -i "s|image: embarkx/tax-service-a.*|image: ${SERVICE_A_IMAGE}:${IMAGE_TAG}|" \
-            k8s/aws/micro-app/service-a.yaml
+            ${{ env.APP_ROOT }}/k8s/aws/micro-app/service-a.yaml
           # Service B
           sed -i "s|image: embarkx/tax-service-b.*|image: ${SERVICE_B_IMAGE}:${IMAGE_TAG}|" \
-            k8s/aws/micro-app/service-b.yaml
+            ${{ env.APP_ROOT }}/k8s/aws/micro-app/service-b.yaml
 
       # ---------- 13. Apply deployments & services ----------
       - name: Deploy service-a
-        run: kubectl apply -f k8s/aws/micro-app/service-a.yaml
+        run: kubectl apply -f ${{ env.APP_ROOT }}/k8s/aws/micro-app/service-a.yaml
 
       - name: Deploy service-b
-        run: kubectl apply -f k8s/aws/micro-app/service-b.yaml
+        run: kubectl apply -f ${{ env.APP_ROOT }}/k8s/aws/micro-app/service-b.yaml
 
       # ---------- 14. Apply ingress ----------
       - name: Apply ingress
-        run: kubectl apply -f k8s/aws/micro-app/multi-service-ingress.yaml
+        run: kubectl apply -f ${{ env.APP_ROOT }}/k8s/aws/micro-app/multi-service-ingress.yaml
 
       # ---------- 15. Wait for rollout ----------
       - name: Wait for service-a rollout
