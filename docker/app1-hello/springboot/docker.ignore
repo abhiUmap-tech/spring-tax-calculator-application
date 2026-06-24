@@ -1,0 +1,7 @@
+target/
+logs
+temp.txt
+.git
+Dockerfile
+.idea
+

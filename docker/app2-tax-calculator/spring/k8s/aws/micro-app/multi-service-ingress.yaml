@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multi-service-ingress
+  labels:
+    app.kubernetes.io/name: multi-service-ingress
+    app.kubernetes.io/part-of: tax-calculator
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # BACKEND — /api/<path> -> /<path> on service-a (e.g. /api/price -> /price)
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: service-a-svc
+                port:
+                  number: 80
+          # FRONTEND — serve static UI at root
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

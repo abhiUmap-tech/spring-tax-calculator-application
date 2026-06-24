@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hello</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-from: #0d0d14;
+            --bg-to: #1a0d2e;
+            --accent: #c084fc;
+            --accent-dim: rgba(192, 132, 252, 0.15);
+            --text-primary: #f5f0ff;
+            --text-muted: rgba(245, 240, 255, 0.4);
+            --divider: rgba(245, 240, 255, 0.08);
+            transition: --bg-from 2s, --bg-to 2s, --accent 2s;
+        }
+
+        /* Time-of-day themes */
+        body.morning  { --bg-from: #0c1a2e; --bg-to: #1a2a0a; --accent: #86efac; --accent-dim: rgba(134,239,172,0.12); }
+        body.afternoon{ --bg-from: #1a0e00; --bg-to: #0d0d14; --accent: #fbbf24; --accent-dim: rgba(251,191,36,0.12); }
+        body.evening  { --bg-from: #0d0d14; --bg-to: #1a0d2e; --accent: #c084fc; --accent-dim: rgba(192,132,252,0.15); }
+        body.night    { --bg-from: #080810; --bg-to: #0d0a1a; --accent: #7dd3fc; --accent-dim: rgba(125,211,252,0.10); }
+
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(ellipse at 30% 20%, var(--bg-to) 0%, var(--bg-from) 70%);
+            font-family: 'DM Sans', system-ui, sans-serif;
+            color: var(--text-primary);
+            overflow: hidden;
+            transition: background 2s ease;
+        }
+
+        /* Ambient orb */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+            top: -100px; right: -100px;
+            pointer-events: none;
+            transition: background 2s ease;
+        }
+
+        /* Noise texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 2rem;
+            max-width: 720px;
+            width: 100%;
+        }
+
+        /* Eyebrow */
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+            font-weight: 300;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .eyebrow-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.5; transform: scale(0.7); }
+        }
+
+        /* Main heading */
+        .greeting-label {
+            display: block;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            background: linear-gradient(160deg, var(--text-primary) 40%, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: background 2s ease;
+        }
+
+        .greeting-suffix {
+            display: block;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            font-weight: 700;
+            font-style: italic;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--accent);
+            -webkit-text-fill-color: var(--accent);
+            opacity: 0;
+            transform: translateY(12px);
+            animation: revealSuffix 0.8s cubic-bezier(0.22,1,0.36,1) 0.4s forwards;
+        }
+
+        @keyframes revealSuffix {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .greeting-label {
+            opacity: 0;
+            transform: translateY(16px);
+            animation: revealLabel 0.8s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+        }
+
+        @keyframes revealLabel {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Divider */
+        .divider {
+            width: 48px;
+            height: 1px;
+            background: var(--accent);
+            margin: 2.5rem auto;
+            opacity: 0.5;
+            transition: background 2s;
+        }
+
+        /* Sub-text */
+        .subtext {
+            font-size: 1.05rem;
+            font-weight: 300;
+            color: var(--text-muted);
+            line-height: 1.7;
+            letter-spacing: 0.01em;
+            opacity: 0;
+            animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.7s forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Clock */
+        .clock {
+            margin-top: 3rem;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            font-feature-settings: 'tnum';
+            opacity: 0;
+            animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 1s forwards;
+        }
+
+        .clock span {
+            color: var(--accent);
+            transition: color 2s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="eyebrow">
+        <div class="eyebrow-dot"></div>
+        <span id="date-label"></span>
+    </div>
+
+    <h1>
+        <span class="greeting-label" id="greeting-label">Good Evening,</span>
+        <span class="greeting-suffix">welcome.</span>
+    </h1>
+
+    <div class="divider"></div>
+
+    <p class="subtext" id="subtext">The day is yours — make it count.</p>
+
+    <div class="clock">Local time &nbsp;<span id="clock"></span></div>
+</div>
+
+<script>
+    const greetings = {
+        morning:   { label: 'Good Morning,', body: document.body, class: 'morning',   sub: 'A fresh start. The day is full of possibility.' },
+        afternoon: { label: 'Good Afternoon,', class: 'afternoon', sub: 'Halfway there. Keep the momentum going.' },
+        evening:   { label: 'Good Evening,', class: 'evening',   sub: 'The day winds down. You showed up — that matters.' },
+        night:     { label: 'Good Night,', class: 'night',     sub: 'Rest well. Tomorrow is another chance to begin.' },
+    };
+
+    function getTimeOfDay(h) {
+        if (h >= 5  && h < 12) return 'morning';
+        if (h >= 12 && h < 17) return 'afternoon';
+        if (h >= 17 && h < 21) return 'evening';
+        return 'night';
+    }
+
+    const now = new Date();
+    const period = getTimeOfDay(now.getHours());
+    const g = greetings[period];
+
+    document.body.classList.add(period);
+    document.getElementById('greeting-label').textContent = g.label;
+    document.getElementById('subtext').textContent = g.sub;
+    document.getElementById('date-label').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+    const clock = document.getElementById('clock');
+    const tick = () => {
+        clock.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    };
+    tick();
+    setInterval(tick, 1000);
+</script>
+</body>
+</html>
